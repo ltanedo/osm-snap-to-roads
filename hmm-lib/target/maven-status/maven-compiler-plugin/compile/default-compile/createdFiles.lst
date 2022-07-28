@@ -1,0 +1,6 @@
+com/bmw/hmm/SequenceState.class
+com/bmw/hmm/Utils.class
+com/bmw/hmm/ViterbiAlgorithm.class
+com/bmw/hmm/ViterbiAlgorithm$ExtendedState.class
+com/bmw/hmm/ViterbiAlgorithm$ForwardStepResult.class
+com/bmw/hmm/Transition.class

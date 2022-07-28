@@ -1,0 +1,6 @@
+com/graphhopper/matching/http/MapMatchingResource.class
+com/graphhopper/matching/gpx/Trkpt.class
+com/graphhopper/matching/http/MapMatchingBundle.class
+com/graphhopper/matching/gpx/Gpx.class
+com/graphhopper/matching/gpx/Trkseg.class
+com/graphhopper/matching/gpx/Trk.class

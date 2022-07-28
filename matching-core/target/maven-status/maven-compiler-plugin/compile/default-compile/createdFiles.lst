@@ -1,0 +1,10 @@
+com/graphhopper/matching/MapMatching$1.class
+com/graphhopper/matching/EdgeMatch.class
+com/graphhopper/matching/GPXExtension.class
+com/graphhopper/matching/util/Distributions.class
+com/graphhopper/matching/util/HmmProbabilities.class
+com/graphhopper/matching/MapMatching.class
+com/graphhopper/matching/MapMatching$2.class
+com/graphhopper/matching/MatchResult.class
+com/graphhopper/matching/MapMatching$MapMatchedPath.class
+com/graphhopper/matching/util/TimeStep.class

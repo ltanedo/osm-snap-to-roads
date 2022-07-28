@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="view traces" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Plot Select Lines of GPS traces</title>
+    <style>
+        html,
+        body,
+        #map {
+            height: 95%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #panel {
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            margin-left: -180px;
+            z-index: 5;
+            background-color: #fff;
+            padding: 5px;
+            border: 1px solid #999;
+        }
+
+        #bar {
+            width: 240px;
+            background-color: rgba(255, 255, 255, 0.75);
+            margin: 8px;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        #draw_button {
+            font-size: 15pt;
+        }
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="constants.js"></script>
+    <input type="file" id="select_file">
+    <input type="number" id="start_line_number">
+    <input type="number" id="end_line_number">
+    <input type="button" id="draw_button" value="Draw" onClick="drawTrace(latlngArray)">
+
+    <script>
+        var apiKey = config.APIKEY;
+
+        var map;
+        var polyline;
+        var allPolylines = [];
+        var path = [];
+        var centerLat;
+        var centerLng;
+        var latlngArray = [];  //collection of lat and lng from the txt
+
+        var networkCount = 0;  // the number of lines with provider 'network'
+
+        //parse the input txt file
+        document.getElementById('select_file').onchange = function () {
+
+            var file = this.files[0];
+            var reader = new FileReader();
+
+            reader.onload = function (progressEvent) {
+
+                var lines = this.result.split('\n');
+
+                latlngArray = [];
+                for (var line = 1; line < lines.length - 1; line++) {
+                    var _line = $.trim(lines[line].replace(/"/g, ''));  // remove the trailing newline
+                    var parsedString = _line.split(',');
+                    var lineSegCount = parsedString.length;
+                    var provider = parsedString[lineSegCount - 1].toLowerCase();
+                    if (provider === "network") {
+                        networkCount++;
+                        continue;
+                    }
+
+                    var lat = parsedString[2];
+                    var long = parsedString[3];
+                    var latlng = lat + ',' + long;
+                    latlngArray.push(latlng);
+                }
+
+                var centerPoint = latlngArray[Math.round(latlngArray.length / 2)];
+                centerLat = centerPoint.split(',')[0];
+                centerLng = centerPoint.split(',')[1]
+            };
+            reader.readAsText(file);
+        };
+
+
+        // initialize google map
+        function initialize() {
+            var mapOptions = {
+                zoom: 13,
+                center: { lat: 43.00104524, lng: -78.82297068 },
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+            map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+            $('#clear').click(function (ev) {
+                for (var i = 0; i < allPolylines.length; i++) {
+                    allPolylines[i].setMap(null);
+                }
+                allPolylines = [];
+                ev.preventDefault();
+                return false;
+            });
+        }
+
+
+        function drawTrace(latlngArray) {
+            path = [];
+            var startLineNumber = document.getElementById("start_line_number").value;
+
+            // not included (i.e. excluded)
+            var endLineNumber = document.getElementById("end_line_number").value;
+
+            if (startLineNumber === NaN) {
+                startLineNumber = 0;
+            }
+            else {
+                startLineNumber = parseInt(startLineNumber);
+                startLineNumber = startLineNumber >= 0 ? startLineNumber : 0;
+            }
+
+            if (endLineNumber === NaN) {
+                endLineNumber = latlngArray.length;
+            }
+            else {
+                endLineNumber = parseInt(endLineNumber);
+                endLineNumber = endLineNumber < latlngArray.length ? endLineNumber : latlngArray.length;
+            }
+
+            for (var i = startLineNumber; i < endLineNumber; i++) {
+
+                var lat = parseFloat(latlngArray[i].split(',')[0]);
+                var lng = parseFloat(latlngArray[i].split(',')[1]);
+                var latlng = new google.maps.LatLng(lat, lng);
+
+                path.push(latlng);
+            }
+
+            // map.setCenter(path[Math.round(path.length / 2)]);
+
+            var bounds = new google.maps.LatLngBounds();
+            for (var i = 0; i < path.length; i++) {
+                bounds.extend(path[i]);
+            }
+
+            // set the bound, the center, and ajust the zoom level
+            map.fitBounds(bounds);
+
+            drawPolyline();
+            console.log('number of points (from gps provider):' + latlngArray.length);
+            console.log('start: ' + startLineNumber);
+            console.log('end:' + endLineNumber);
+        }
+
+
+        function drawPolyline() {
+            // Define a symbol using a predefined path (an arrow)
+            // supplied by the Google Maps JavaScript API.
+            var lineSymbol = {
+                path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW
+            };
+
+            var arrowSets = [];
+            for (var i = 1; i <= 100; i++) {
+                var _icon = {icon: lineSymbol, offset: i.toString() + '%'};
+                arrowSets.push(_icon);
+            }
+
+            polyline = new google.maps.Polyline({
+                path: path,
+                strokeColor: 'black',
+                strokeWeight: 1,
+                strokeOpacity: 0.5,
+                icons: arrowSets
+            });
+
+            polyline.setMap(map);
+            allPolylines.push(polyline);
+        }
+
+    </script>
+</head>
+
+<body>
+    <div id="map"></div>
+    <div id="bar">
+        <p><a id="clear" href="#">Click here</a> to clear map.</p>
+    </div>
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9Mb-Qmw2YkcO5t753lkvIY3JzsadxiYs&callback=initialize">
+        </script>
+</body>
+
+</html>

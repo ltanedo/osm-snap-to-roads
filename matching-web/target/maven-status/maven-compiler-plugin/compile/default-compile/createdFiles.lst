@@ -1,0 +1,9 @@
+com/graphhopper/matching/cli/ImportCommand.class
+com/graphhopper/matching/http/RootResource.class
+com/graphhopper/matching/cli/MatchCommand.class
+com/graphhopper/matching/http/MapMatchingApplication.class
+com/graphhopper/matching/cli/GetBoundsCommand.class
+com/graphhopper/matching/cli/MeasurementCommand.class
+com/graphhopper/matching/http/MapMatchingServerConfiguration.class
+com/graphhopper/matching/cli/MeasurementCommand$2.class
+com/graphhopper/matching/cli/MeasurementCommand$1.class

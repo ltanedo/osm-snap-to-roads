@@ -1,0 +1,18 @@
+{
+    "name": "map-related",
+    "version": "0.1.0",
+    "description": "Deal with gps.",
+    "main": "cli.js",
+    "contributors": [],
+    "license": "MIT",
+    "dependencies": {
+        "jsdom": "latest",
+        "jquery": "latest",
+        "fs": "latest",
+        "opn": "latest",
+        "express": "latest",
+        "find": "latest",
+        "geodist": "latest",
+        "@google/maps": "latest"
+    }
+}

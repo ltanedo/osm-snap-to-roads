@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="view traces" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Plot Select Lines of GPS traces</title>
+    <style>
+        html,
+        body,
+        #map {
+            height: 95%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #panel {
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            margin-left: -180px;
+            z-index: 5;
+            background-color: #fff;
+            padding: 5px;
+            border: 1px solid #999;
+        }
+
+        #bar {
+            width: 240px;
+            background-color: rgba(255, 255, 255, 0.75);
+            margin: 8px;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        #draw_button {
+            font-size: 15pt;
+        }
+
+        #legend {
+            font-family: Arial, sans-serif;
+            background: #fff;
+            padding: 10px;
+            margin: 10px;
+            border: 3px solid #000;
+        }
+        #legend h3 {
+            margin-top: 0;
+        }
+        #legend img {
+            vertical-align: middle;
+        }
+
+        #ddlCars {
+            min-height:190px; 
+            overflow-y :auto; 
+            overflow-x:hidden; 
+            position:absolute;
+            width:300px;
+            display: contents;
+        }
+        /* Dropdown Button */
+        .dropbtn {
+        background-color: #3498DB;
+        color: white;
+        padding: 16px;
+        font-size: 16px;
+        border: none;
+        cursor: pointer;
+        }
+
+        /* Dropdown button on hover & focus */
+        .dropbtn:hover, .dropbtn:focus {
+        background-color: #2980B9;
+        }
+
+        /* The container <div> - needed to position the dropdown content */
+        .dropdown {
+        position: relative;
+        display: inline-block;
+        }
+
+        /* Dropdown Content (Hidden by Default) */
+        .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f1f1f1;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+        }
+
+        /* Links inside the dropdown */
+        .dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        }
+
+        /* Change color of dropdown links on hover */
+        .dropdown-content a:hover {background-color: #ddd}
+
+        /* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
+        .show {display:block;}
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="constants.js"></script>
+    <input type="file" id="select_file">
+    <input type="number" id="start_line_number">
+    <input type="number" id="end_line_number">
+    <input type="button" id="draw_button" value="Draw" onClick="drawTrace(latlngArray)">
+    <div class="dropdown">
+            <button onclick="myFunctionHour()" class="dropbtn">Hour</button>
+            <div id="myDropdownHour" class="dropdown-content">
+              <a href="#" id="5" onclick="getHour(this)">5am</a>
+              <a href="#" id="6" onclick="getHour(this)">6am</a>
+              <a href="#" id="7" onclick="getHour(this)">7am</a>
+              <a href="#" id="8" onclick="getHour(this)">8am</a>
+              <a href="#" id="9" onclick="getHour(this)">9am</a>
+              <a href="#" id="10" onclick="getHour(this)">10am</a>
+              <a href="#" id="11" onclick="getHour(this)">11am</a>
+              <a href="#" id="12" onclick="getHour(this)">12pm</a>
+              <a href="#" id="13" onclick="getHour(this)">1pm</a>
+              <a href="#" id="14" onclick="getHour(this)">2pm</a>
+              <a href="#" id="15" onclick="getHour(this)">3pm</a>
+              <a href="#" id="16" onclick="getHour(this)">4pm</a>
+              <a href="#" id="17" onclick="getHour(this)">5pm</a>
+              <a href="#" id="18" onclick="getHour(this)">6pm</a>
+              <a href="#" id="19" onclick="getHour(this)">7pm</a>
+              <a href="#" id="20" onclick="getHour(this)">8pm</a>
+              <a href="#" id="21" onclick="getHour(this)">9pm</a>
+              <a href="#" id="22" onclick="getHour(this)">10pm</a>
+              <a href="#" id="23" onclick="getHour(this)">11pm</a>
+              <a href="#" id="0" onclick="getHour(this)">12am</a>
+              <a href="#" id="1" onclick="getHour(this)">1am</a>
+              <a href="#" id="2" onclick="getHour(this)">2am</a>
+              <a href="#" id="3" onclick="getHour(this)">3am</a>
+              <a href="#" id="4" onclick="getHour(this)">4am</a>
+            </div>
+          </div>
+        <div class="dropdown">
+            <button onclick="myFunctionInterval()" class="dropbtn">Interval</button>
+            <div id="myDropdownInterval" class="dropdown-content">
+                <a href="#" id="interval_item_one" onclick="getInterval(this)">0  - 15min</a>
+                <a href="#" id="interval_item_two" onclick="getInterval(this)">15 - 30min</a>
+                <a href="#" id="interval_item_three" onclick="getInterval(this)">30 - 45min</a>
+                <a href="#" id="interval_item_four" onclick="getInterval(this)">45 - 60min</a>
+            </div>
+        </div>
+
+    <script>
+        /*
+        Global Vars - ORIGINAL
+        */
+        var apiKey = config.APIKEY;
+        var map;
+        var polyline;
+        var allPolylines = [];
+        var path = [];
+        var centerLat;
+        var centerLng;
+        var latlngArray = [];  //collection of lat and lng from the txt
+        var networkCount = 0;  // the number of lines with provider 'network'
+        var timeArray = [];
+        var speedArray = [];
+
+        /*
+        Global Vars - CUSTOM
+        */
+        var hour_selection = 0;
+        var interval_selection = 0;
+        
+        document.getElementById('select_file').onclick = function () {
+            if (hour_selection == 0 && interval_selection == 0) {
+                window.alert('need interval!');
+                return;
+            }
+        }
+        //parse the input txt file
+        document.getElementById('select_file').onchange = function () {
+
+            var file = this.files[0];
+
+            if (hour_selection == 0 && interval_selection == 0) {
+                window.alert('need interval!');
+                return;
+            }
+
+            var reader = new FileReader();
+
+            reader.onload = function (progressEvent) {
+
+                var lines = this.result.split('\n');
+
+                latlngArray = [];
+                speedArray = [];
+                timeArray = [];
+
+                for (var line = 1; line < lines.length - 1; line++) {
+                    var _line = $.trim(lines[line].replace(/"/g, ''));  // remove the trailing newline
+                    var parsedString = _line.split(',');
+                    var lineSegCount = parsedString.length;
+                    var provider = parsedString[lineSegCount - 1].toLowerCase();
+                    if (provider === "network") {
+                        networkCount++;
+                        continue;
+                    }
+
+                    var lat = parsedString[2];
+                    var long = parsedString[3];
+
+                    /*********************************
+                    Custom
+                    **********************************/
+
+                    var speed = parsedString[4];
+                    var time = parsedString[1];
+                    // window.alert(parseFloat(speed));
+                    speedArray.push(speed);
+                    timeArray.push(time);
+
+                    var latlng = lat + ',' + long;
+                    latlngArray.push(latlng);
+                }
+
+                var centerPoint = latlngArray[Math.round(latlngArray.length / 2)];
+                centerLat = centerPoint.split(',')[0];
+                centerLng = centerPoint.split(',')[1]
+            };
+            reader.readAsText(file);
+        };
+
+
+        // initialize google map
+        function initialize() {
+            var mapOptions = {
+                zoom: 13,
+                center: { lat: 43.00104524, lng: -78.82297068 },
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+            map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+            $('#clear').click(function (ev) {
+                for (var i = 0; i < allPolylines.length; i++) {
+                    allPolylines[i].setMap(null);
+                }
+                allPolylines = [];
+                ev.preventDefault();
+                return false;
+            });
+
+            var iconBase = 'https://maps.google.com/mapfiles/';
+            var icons = {
+            parking: {
+                name: 'Fast',
+                icon: iconBase + 'ms/icons/green.png'
+            },
+            library: {
+                name: 'Normal',
+                icon: iconBase + 'ms/icons/yellow.png'
+            },
+            info: {
+                name: 'Slow',
+                icon: iconBase + 'ms/icons/red.png'
+            }
+            };
+
+            var features = [
+            {
+                position: new google.maps.LatLng(-33.91721, 151.22630),
+                type: 'info'
+            }, {
+                position: new google.maps.LatLng(-33.91539, 151.22820),
+                type: 'info'
+            }, {
+                position: new google.maps.LatLng(-33.91747, 151.22912),
+                type: 'info'
+            }, {
+                position: new google.maps.LatLng(-33.91910, 151.22907),
+                type: 'info'
+            }, {
+                position: new google.maps.LatLng(-33.91725, 151.23011),
+                type: 'info'
+            }, {
+                position: new google.maps.LatLng(-33.91872, 151.23089),
+                type: 'info'
+            }, {
+                position: new google.maps.LatLng(-33.91784, 151.23094),
+                type: 'info'
+            }, {
+                position: new google.maps.LatLng(-33.91682, 151.23149),
+                type: 'info'
+            }, {
+                position: new google.maps.LatLng(-33.91790, 151.23463),
+                type: 'info'
+            }, {
+                position: new google.maps.LatLng(-33.91666, 151.23468),
+                type: 'info'
+            }, {
+                position: new google.maps.LatLng(-33.916988, 151.233640),
+                type: 'info'
+            }, {
+                position: new google.maps.LatLng(-33.91662347903106, 151.22879464019775),
+                type: 'parking'
+            }, {
+                position: new google.maps.LatLng(-33.916365282092855, 151.22937399734496),
+                type: 'parking'
+            }, {
+                position: new google.maps.LatLng(-33.91665018901448, 151.2282474695587),
+                type: 'parking'
+            }, {
+                position: new google.maps.LatLng(-33.919543720969806, 151.23112279762267),
+                type: 'parking'
+            }, {
+                position: new google.maps.LatLng(-33.91608037421864, 151.23288232673644),
+                type: 'parking'
+            }, {
+                position: new google.maps.LatLng(-33.91851096391805, 151.2344058214569),
+                type: 'parking'
+            }, {
+                position: new google.maps.LatLng(-33.91818154739766, 151.2346203981781),
+                type: 'parking'
+            }, {
+                position: new google.maps.LatLng(-33.91727341958453, 151.23348314155578),
+                type: 'library'
+            }
+            ];
+
+            // Create markers.
+            features.forEach(function(feature) {
+            var marker = new google.maps.Marker({
+                position: feature.position,
+                icon: icons[feature.type].icon,
+                map: map
+            });
+            });
+
+            var legend = document.getElementById('legend');
+            for (var key in icons) {
+            var type = icons[key];
+            var name = type.name;
+            var icon = type.icon;
+            var div = document.createElement('div');
+            div.innerHTML = '<img src="' + icon + '"> ' + name;
+            legend.appendChild(div);
+            }
+
+            map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(legend);
+        }
+
+
+        function drawTrace(latlngArray) {
+
+            if (hour_selection == 0 && interval_selection == 0) {
+                window.alert('need interval!');
+                return;
+            }
+
+            path = [];
+            var startLineNumber = document.getElementById("start_line_number").value;
+
+            // not included (i.e. excluded)
+            var endLineNumber = document.getElementById("end_line_number").value;
+
+            if (startLineNumber === NaN) {
+                startLineNumber = 0;
+            }
+            else {
+                startLineNumber = parseInt(startLineNumber);
+                startLineNumber = startLineNumber >= 0 ? startLineNumber : 0;
+            }
+
+            if (endLineNumber === NaN) {
+                endLineNumber = latlngArray.length;
+            }
+            else {
+                endLineNumber = parseInt(endLineNumber);
+                endLineNumber = endLineNumber < latlngArray.length ? endLineNumber : latlngArray.length;
+            }
+
+            for (var i = startLineNumber; i < endLineNumber; i++) {
+
+                var lat = parseFloat(latlngArray[i].split(',')[0]);
+                var lng = parseFloat(latlngArray[i].split(',')[1]);
+                var latlng = new google.maps.LatLng(lat, lng);
+
+                path.push(latlng);
+            }
+
+            // map.setCenter(path[Math.round(path.length / 2)]);
+
+            var bounds = new google.maps.LatLngBounds();
+            for (var i = 0; i < path.length; i++) {
+                bounds.extend(path[i]);
+            }
+
+            // set the bound, the center, and ajust the zoom level
+            map.fitBounds(bounds);
+            m_speed = getAverageSpeed()
+            alert(m_speed)
+
+            if (m_speed > 7.581748628934579) {
+                drawPolyline('green');
+            }
+            else {
+                drawPolyline('red');
+            }
+
+            console.log('number of points (from gps provider):' + latlngArray.length);
+            console.log('start: ' + startLineNumber);
+            console.log('end:' + endLineNumber);
+        }
+
+        function getAverageSpeed() {
+            var averageSpeed = 0;
+            for(var i=0; i < speedArray.length; i++){
+
+                averageSpeed += parseFloat(speedArray[i]);
+
+            }
+            return averageSpeed/speedArray.length;        
+        }
+
+        function drawPolyline(color) {
+            // Define a symbol using a predefined path (an arrow)
+            // supplied by the Google Maps JavaScript API.
+            var lineSymbol = {
+                path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW
+            };
+
+            var arrowSets = [];
+            for (var i = 1; i <= 100; i++) {
+                var _icon = {icon: lineSymbol, offset: i.toString() + '%'};
+                arrowSets.push(_icon);
+            }
+
+            polyline = new google.maps.Polyline({
+                path: path,
+                strokeColor: color,
+                strokeWeight: 1,
+                strokeOpacity: 0.5,
+                icons: arrowSets
+            });
+
+            polyline.setMap(map);
+            allPolylines.push(polyline);
+        }
+
+        
+        /*****************************************************
+        UI FUNCTIONS - Dropdowns
+        */
+        function myFunctionHour() {
+        document.getElementById("myDropdownHour").classList.toggle("show");
+        }
+        function myFunctionInterval() {
+        document.getElementById("myDropdownInterval").classList.toggle("show");
+        }
+        // Close the dropdown menu if the user clicks outside of it
+        window.onclick = function(event) {
+        if (!event.target.matches('.dropbtn')) {
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            var i;
+            for (i = 0; i < dropdowns.length; i++) {
+            var openDropdown = dropdowns[i];
+            if (openDropdown.classList.contains('show')) {
+                openDropdown.classList.remove('show');
+            }
+            }
+        }
+        }
+
+        /*
+        UI FUNCTIONS - Dropdowns
+        */
+        function getHour(el) {
+          //document.getElementById("interval_item").innerHTML = "YOU CLICKED ME!";
+
+          hour_selection = document.getElementById(el.id).textContent;
+
+          if (hour_selection == '5am') {
+            interval_selection = 5;
+          }
+          else if (hour_selection == '6am') {
+            hour_selection = 6;
+          }
+          else if (hour_selection == '7am') {
+            hour_selection = 7;
+          }
+          else if (hour_selection == '8am') {
+            hour_selection = 8;
+          }
+          else if (interval_selection == '9am') {
+            hour_selection = 9;
+          }
+          else if (hour_selection == '10am') {
+            hour_selection = 10;
+          }
+          else if (hour_selection == '11am') {
+            hour_selection = 11;
+          }
+          else if (hour_selection == '12pm') {
+            hour_selection = 12;
+          }
+          else if (hour_selection == '1pm') {
+            hour_selection = 13;
+          }
+          else if (hour_selection == '2pm') {
+            hour_selection = 14;
+          }
+          else if (hour_selection == '3pm') {
+            hour_selection = 15;
+          }
+          else if (hour_selection == '4pm') {
+            hour_selection = 16;
+          }
+          else if (hour_selection == '5pm') {
+            hour_selection = 17;
+          }
+          else if (hour_selection == '6pm') {
+            hour_selection = 18;
+          }
+          else if (hour_selection == '7pm') {
+            hour_selection = 19;
+          }
+          else if (hour_selection == '8pm') {
+            hour_selection = 20;
+          }
+          else if (hour_selection == '9pm') {
+            hour_selection = 21;
+          }
+          else if (hour_selection == '10pm') {
+            hour_selection = 22;
+          }
+          else if (hour_selection == '11pm') {
+            hour_selection = 23;
+          }
+          else if (hour_selection == '12am') {
+            hour_selection = 0;
+          }
+          else if (hour_selection == '1am') {
+            hour_selection = 1;
+          }
+          else if (hour_selection == '2am') {
+            hour_selection = 2;
+          }
+          else if (hour_selection == '3am') {
+            hour_selection = 3;
+          }
+          else if (hour_selection == '4am') {
+            hour_selection = 4;
+          }
+             
+        window.alert(parseInt(hour_selection));
+          // window.alert(el.id);
+        }
+
+        /*
+        UI FUNCTIONS - Dropdowns
+        */
+        function getInterval(el) {
+          //document.getElementById("interval_item").innerHTML = "YOU CLICKED ME!";
+
+          interval_selection = document.getElementById(el.id).textContent;
+
+          if (interval_selection == '0  - 15min') {
+            interval_selection = 15;
+          }
+          else if (interval_selection == '15 - 30min') {
+            interval_selection = 30;
+          }
+          else if (interval_selection == '30 - 45min') {
+            interval_selection = 45;
+          }
+          else if (interval_selection == '45 - 60min') {
+            interval_selection = 60;
+          }
+             
+        window.alert(parseInt(interval_selection));
+          // window.alert(el.id);
+        }
+    </script>
+</head>
+
+<body>
+    <div id="map"></div>
+    <div id="legend"><h3>Legend</h3></div>
+    <div id="bar">
+        <p><a id="clear" href="#">Click here</a> to clear map.</p>
+    </div>
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9Mb-Qmw2YkcO5t753lkvIY3JzsadxiYs&callback=initialize">
+        </script>
+</body>
+
+</html>

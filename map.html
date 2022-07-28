@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <meta charset="utf-8">
+  <title>Snap To Road</title>
+  <style>
+    html,
+    body,
+    #map {
+      height: 95%;
+      margin: 0;
+      padding: 0;
+    }
+
+    #panel {
+      position: absolute;
+      top: 5px;
+      left: 50%;
+      margin-left: -180px;
+      z-index: 5;
+      background-color: #fff;
+      padding: 5px;
+      border: 1px solid #999;
+    }
+
+    #bar {
+      width: 240px;
+      background-color: rgba(255, 255, 255, 0.75);
+      margin: 8px;
+      padding: 4px;
+      border-radius: 4px;
+    }
+
+    #draw_button {
+      font-size: 15pt;
+    }
+  </style>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="constants.js"></script>
+  <input type="file" id="select_file">
+  <input type="button" id="draw_button" value="Draw" onClick="drawSnapRoad(latlngArray)">
+
+  <script>
+    var apiKey = config.APIKEY;
+
+    var map;
+    var drawingManager;
+    var placeIdArray = [];
+    var polylines = [];
+    var snappedCoordinates = [];
+    var bigcount = 0;  //counting iteration for debugging
+    var centerLat;
+    var centerLng;
+    var latlngString = []; //collection of lat and lng of the snap road
+    // var lastPoints;
+    var timeStamps = [];  //collection of time stamps
+    var countTime = 0;
+
+    var snappedlatlng = [];
+    var latlngArray = [];  //collection of lat and lng from the txt
+    var countCoord = 0;
+
+    //parse the input txt file
+    document.getElementById('select_file').onchange = function () {
+
+      var file = this.files[0];
+      var reader = new FileReader();
+
+      reader.onload = function (progressEvent) {
+        var count = 0;
+
+        var lines = this.result.split('\n');
+        for (var line = 1; line < lines.length - 1; line++) {
+          var coord;
+
+          count = count + 1;
+          var _line = $.trim(lines[line].replace(/"/g, ''));
+          var parsedString = _line.split(',');
+          var provider = parsedString[parsedString.length - 1].toLowerCase();
+          if (provider === "network") {
+            continue;
+          }
+
+          var time = parsedString[0];
+          timeStamps.push(time);
+
+          var lat = parsedString[2];
+          var long = parsedString[3];
+          var latlng = lat + ',' + long;
+          latlngArray.push(latlng);
+        }
+        var centerPoint = latlngArray[latlngArray.length / 2];
+        centerLat = centerPoint.split(',')[0];
+        centerLng = centerPoint.split(',')[1]
+      };
+      reader.readAsText(file);
+    };
+
+    // initialize google map
+    function initialize() {
+      var mapOptions = {
+        zoom: 13,
+        center: { lat: 43.00104524, lng: -78.82297068 }
+      };
+      map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+      $('#clear').click(function (ev) {
+        for (var i = 0; i < polylines.length; i++) {
+          polylines[i].setMap(null);
+        }
+        polylines = [];
+        ev.preventDefault();
+        return false;
+      });
+    }
+
+    //draws the snapRoad
+    function drawSnapRoad(latlngArray) {
+      var myLatLng = new google.maps.LatLng(centerLat, centerLng);
+      map.setCenter(myLatLng);
+      var counter = 0;
+      var count = 0;
+      var tempLatLng = [];
+      for (var i = 0; i < latlngArray.length; i++) {
+        counter++;
+
+        if (counter === 90 || i === latlngArray.length - 1) {
+          tempLatLng.push(latlngArray[i]);
+          counter = 0;
+
+          runSnapToRoad(tempLatLng.join('|'));
+
+          tempLatLng = [];
+        }
+        else {
+          tempLatLng.push(latlngArray[i]);
+        }
+      }
+      console.log(latlngArray.length);
+    }
+
+    //run snap to road function
+    function runSnapToRoad(p) {
+      $.get('https://roads.googleapis.com/v1/snapToRoads', {
+        interpolate: false,
+        key: apiKey,
+        path: p
+      }, function (data) {
+        processSnapToRoadResponse(data);
+        drawSnappedPolyline();
+      });
+    }
+
+    // Store snapped polyline returned by the snap-to-road service.
+    function processSnapToRoadResponse(data) {
+      snappedCoordinates = [];
+      placeIdArray = [];
+
+      console.log(bigcount);
+      for (var i = 0; i < data.snappedPoints.length; i++) {
+        bigcount++;
+        var latlng = new google.maps.LatLng(
+          data.snappedPoints[i].location.latitude,
+          data.snappedPoints[i].location.longitude);
+        var tempString = latlng.toString().replace(/\(|\)/g, '').split(', ')[0] + ',' + latlng.toString().replace(/\(|\)/g, '').split(', ')[1];
+
+        snappedCoordinates.push(latlng);
+
+        placeIdArray.push(data.snappedPoints[i].placeId);
+      }
+    }
+
+    // Draws the snapped polyline (after processing snap-to-road response).
+    function drawSnappedPolyline() {
+      var snappedPolyline = new google.maps.Polyline({
+        path: snappedCoordinates,
+        strokeColor: 'black',
+        strokeWeight: 3
+      });
+
+      snappedPolyline.setMap(map);
+      polylines.push(snappedPolyline);
+    }
+
+  </script>
+</head>
+
+<body>
+  <div id="map"></div>
+  <div id="bar">
+    <p><a id="clear" href="#">Click here</a> to clear map.</p>
+  </div>
+  <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9Mb-Qmw2YkcO5t753lkvIY3JzsadxiYs&callback=initialize">
+    </script>
+</body>
+
+</html>

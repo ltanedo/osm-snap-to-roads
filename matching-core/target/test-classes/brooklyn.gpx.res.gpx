@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?><gpx xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" creator="Graphhopper version 0.12.0" version="1.1" xmlns:gh="https://graphhopper.com/public/schema/gpx/1.1">
+<metadata><copyright author="OpenStreetMap contributors"/><link href="http://graphhopper.com"><text>GraphHopper GPX</text></link><time>2016-08-19T21:24:47Z</time></metadata>
+<trk><name>08191724</name><trkseg>
+<trkpt lat="42.82756" lon="-73.882687"><time>2016-08-19T21:24:47Z</time></trkpt>
+<trkpt lat="42.82766" lon="-73.883682"><time>2016-08-19T21:24:51Z</time></trkpt>
+<trkpt lat="42.82782" lon="-73.886113"><time>2016-08-19T21:25:03Z</time></trkpt>
+<trkpt lat="42.827944" lon="-73.887593"><time>2016-08-19T21:25:11Z</time></trkpt>
+<trkpt lat="42.827561" lon="-73.88768"><time>2016-08-19T21:25:14Z</time></trkpt>
+<trkpt lat="42.827452" lon="-73.887762"><time>2016-08-19T21:25:15Z</time></trkpt>
+<trkpt lat="42.827368" lon="-73.887931"><time>2016-08-19T21:25:17Z</time></trkpt>
+<trkpt lat="42.827349" lon="-73.888091"><time>2016-08-19T21:25:18Z</time></trkpt>
+<trkpt lat="42.827354" lon="-73.888237"><time>2016-08-19T21:25:19Z</time></trkpt>
+<trkpt lat="42.827313" lon="-73.888391"><time>2016-08-19T21:25:20Z</time></trkpt>
+<trkpt lat="42.82721" lon="-73.888638"><time>2016-08-19T21:25:21Z</time></trkpt>
+<trkpt lat="42.827052" lon="-73.888946"><time>2016-08-19T21:25:24Z</time></trkpt>
+<trkpt lat="42.827027" lon="-73.889157"><time>2016-08-19T21:25:25Z</time></trkpt>
+<trkpt lat="42.827104" lon="-73.889382"><time>2016-08-19T21:25:27Z</time></trkpt>
+<trkpt lat="42.827328" lon="-73.889677"><time>2016-08-19T21:25:30Z</time></trkpt>
+<trkpt lat="42.827584" lon="-73.890439"><time>2016-08-19T21:25:35Z</time></trkpt>
+<trkpt lat="42.827328" lon="-73.889677"><time>2016-08-19T21:25:41Z</time></trkpt>
+<trkpt lat="42.827104" lon="-73.889382"><time>2016-08-19T21:25:43Z</time></trkpt>
+<trkpt lat="42.826706" lon="-73.889899"><time>2016-08-19T21:25:48Z</time></trkpt>
+<trkpt lat="42.826089" lon="-73.890009"><time>2016-08-19T21:25:54Z</time></trkpt>
+<trkpt lat="42.826124" lon="-73.890682"><time>2016-08-19T21:25:58Z</time></trkpt>
+<trkpt lat="42.826233" lon="-73.892077"><time>2016-08-19T21:26:07Z</time></trkpt>
+<trkpt lat="42.82406" lon="-73.892162"><time>2016-08-19T21:26:25Z</time></trkpt>
+<trkpt lat="42.823981" lon="-73.8914"><time>2016-08-19T21:26:30Z</time></trkpt>
+<trkpt lat="42.823943" lon="-73.890817"><time>2016-08-19T21:26:34Z</time></trkpt>
+<trkpt lat="42.825351" lon="-73.89076"><time>2016-08-19T21:26:46Z</time></trkpt>
+<trkpt lat="42.826124" lon="-73.890682"><time>2016-08-19T21:26:53Z</time></trkpt>
+<trkpt lat="42.826062" lon="-73.889683"><time>2016-08-19T21:27:00Z</time></trkpt>
+</trkseg>
+</trk>
+</gpx>
