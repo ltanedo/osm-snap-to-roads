@@ -1,7 +1,4 @@
-# map-related
-Implement Map Related stuff
-
-## Content
+# osm-snap-to-roads
 1. **Map Matching**: Make [snap to roads](https://developers.google.com/maps/documentation/roads/snap) calls on files that contain gps data,  save the result to new files and show the result on Maps. Eventually, we want it to be able to accept a directory and deal with all `gps.txt` files within it and all its subfolders.
     * Pay attention to the restriction of calling the API
     * Keep async calls in mind
