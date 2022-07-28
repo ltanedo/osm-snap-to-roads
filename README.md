@@ -13,30 +13,6 @@ Implement Map Related stuff
     * How to detect outliers?
     * How to interpolate?
 
-1. **Overview of GPS**: Get some information, such as trip length, average speed, etc., based on the given GPS data, e.g. `gps_filtered.txt`, and save the result in a file `gps_overview.txt` within the same folder as the gps file.
-
-1. Calculate the travel time between given two locations, e.g. UB Stampede stops.
-    * Make a table of the locations of Stampede stops, i.e. `data/stops.txt`
-      - To get coordinates of any location, ~~please visit [this page](https://google-developers.appspot.com/maps/documentation/utils/geocoder/).~~ The previous link can NOT provide accurate enough coordinats for locations since it can only provide up to 6 decimal accuracy.
-      - The schema in the table is `number,name,lat,lon,direction,place ID`, where `direction` can be `down` meaning from North campus to South, and `up` meaning from South to North, and `place ID` is the unique ID used by Google Maps, which can be got from the aforementioned link.
-    * Focus on the segment between `Service Center` and `Maynard`, and the reverse part
-    * Identify bus stops and the driving direction (i.e. from North, or to North) from GPS data
-    * Determine the arrive and departure time
-    * Save inferred information of each segments with time stamp
-
-1. Compare travel time for different period of the day
-    * e.g., every `15` minutes as a period
-    * Or morning rush hour, morning non rush hour, afternoon non rush hour, afternoon rush hour, evening, late night.
-    * Workday, weekends
-
-1. (Optional) Build a desktop application with GUI to easily carry out the aforementioned tasks and for better visualization.
-
-1. Build a website to host Google Maps
-
-1. Mark the road segments by pre-defined colormap based on road segment related values, e.g. traffic volume, road condition.
-    * Might need to be done on both PC and mobile.
-
-
 ## How to run:
 1. Install dependencies
     ```
