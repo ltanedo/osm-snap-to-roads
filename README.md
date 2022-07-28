@@ -13,26 +13,6 @@ Implement Map Related stuff
     * How to detect outliers?
     * How to interpolate?
 
-## How to run:
-1. Install dependencies
-    ```
-    npm install
-    ```
-1. Snap to road (**to be updated**)
-    ```node.js
-    node cli.js input_folder output.txt
-    ```
-1. Visualize GPS trace in a browser:
-    ```HTML
-    plot.html
-    ```
-1. to be continued
-
-
-## Do NOT push your Google api key to the remote repository.
-[How to hide API keys from github](https://gist.github.com/derzorngottes/3b57edc1f996dddcab25)
-
-
 &nbsp;
 &nbsp;
 &nbsp;
@@ -42,7 +22,6 @@ Implement Map Related stuff
 &nbsp;
 &nbsp;
 &nbsp;
-
 
 # Map Mathing Steps
 
